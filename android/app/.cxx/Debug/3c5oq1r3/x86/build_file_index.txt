@@ -1,0 +1,5 @@
+/Users/kombee/Desktop/FirstCare/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/CMakeLists.txt
+/Users/kombee/Desktop/FirstCare/node_modules/@react-native-picker/picker/android/src/main/jni/CMakeLists.txt
+/Users/kombee/Desktop/FirstCare/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt
+/Users/kombee/Desktop/FirstCare/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt
+/Users/kombee/Desktop/FirstCare/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup/CMakeLists.txt
