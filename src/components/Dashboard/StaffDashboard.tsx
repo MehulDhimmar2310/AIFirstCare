@@ -9,6 +9,8 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import SummaryView, { SummaryMetrics } from './SummaryView';
+import { ClaimStage } from '../../types/claim.types';
 
 interface DashboardMetrics {
   totalClaims: number;
@@ -20,6 +22,9 @@ interface DashboardMetrics {
   paymentSettlementFiles: number;
   pendingCourierStickers: number;
   claimUserStatus: number;
+  claimStageBreakdown: {
+    [key in ClaimStage]?: number;
+  };
 }
 
 interface StaffDashboardProps {
@@ -92,6 +97,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ onLogout }) => {
     paymentSettlementFiles: 0,
     pendingCourierStickers: 0,
     claimUserStatus: 0,
+    claimStageBreakdown: {},
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -113,6 +119,14 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ onLogout }) => {
           paymentSettlementFiles: 320,
           pendingCourierStickers: 12,
           claimUserStatus: 45,
+          claimStageBreakdown: {
+            [ClaimStage.ADMITTED]: 85,
+            [ClaimStage.DISCHARGED]: 75,
+            [ClaimStage.FILE_SUBMITTED]: 165,
+            [ClaimStage.SETTLED]: 320,
+            [ClaimStage.PENDING]: 25,
+            [ClaimStage.REJECTED]: 5,
+          },
         });
       } catch (error) {
         Alert.alert('Error', 'Failed to load dashboard data');
@@ -146,6 +160,24 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ onLogout }) => {
     );
   };
 
+  const handleDateFilterChange = (dateFrom: string, dateTo: string) => {
+    // In real app, this would trigger API call with date filters
+    console.log('Date filter changed:', { dateFrom, dateTo });
+  };
+
+  const handleExport = (data: any) => {
+    // In real app, this would handle CSV export
+    console.log('Export data:', data);
+  };
+
+  const summaryMetrics: SummaryMetrics = {
+    totalClaims: metrics.totalClaims,
+    completedClaims: metrics.completedClaims,
+    inProcessClaims: metrics.inProcessClaims,
+    totalHospitals: 0, // Staff doesn't see hospital count
+    claimStageBreakdown: metrics.claimStageBreakdown,
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -166,38 +198,14 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ onLogout }) => {
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Overview Metrics Section */}
-        <SectionHeader title="Overview" />
-        <View style={styles.metricsGrid}>
-          <MetricCard
-            title="Total Claims"
-            value={metrics.totalClaims}
-            color="#4CAF50"
-            icon="📄"
-            onPress={() => handleNavigation('Claims')}
-          />
-          <MetricCard
-            title="Completed Claims"
-            value={metrics.completedClaims}
-            color="#2196F3"
-            icon="✅"
-            onPress={() => handleNavigation('Completed Claims')}
-          />
-          <MetricCard
-            title="In Process Claims"
-            value={metrics.inProcessClaims}
-            color="#FF9800"
-            icon="⏳"
-            onPress={() => handleNavigation('In Process Claims')}
-          />
-          <MetricCard
-            title="Claim User Status"
-            value={metrics.claimUserStatus}
-            color="#9C27B0"
-            icon="👤"
-            onPress={() => handleNavigation('Claim User Status')}
-          />
-        </View>
+        {/* Summary View */}
+        <SummaryView
+          metrics={summaryMetrics}
+          role="staff"
+          onDateFilterChange={handleDateFilterChange}
+          onExport={handleExport}
+          isLoading={isLoading}
+        />
         <Divider />
 
         {/* File Management Section */}

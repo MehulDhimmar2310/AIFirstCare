@@ -192,7 +192,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
               disabled={isLoading}
             >
               <Text style={styles.claimSearchButtonText}>Search Claim Status</Text>
-              <Text style={styles.claimSearchButtonSubtext}>No login required</Text>
+              {/* <Text style={styles.claimSearchButtonSubtext}>No login required</Text> */}
             </TouchableOpacity>
 
             {/* Error Message */}
@@ -230,16 +230,14 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 40,
   },
   logoContainer: {
-    marginBottom: 16,
+    marginBottom: 8,
   },
   logo: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
@@ -375,12 +373,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   claimSearchButton: {
-    backgroundColor: colors.background,
     borderRadius: 8,
-    padding: 16,
+    padding: 4,
     alignItems: 'center',
     marginBottom: 16,
-    borderWidth: 1,
     borderColor: colors.primary,
   },
   claimSearchButtonText: {

@@ -9,11 +9,16 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import SummaryView, { SummaryMetrics } from './SummaryView';
+import { ClaimStage } from '../../types/claim.types';
 
 interface HospitalDashboardMetrics {
   totalClaims: number;
   completedClaims: number;
   inProcessClaims: number;
+  claimStageBreakdown: {
+    [key in ClaimStage]?: number;
+  };
 }
 
 interface HospitalDashboardProps {
@@ -80,6 +85,7 @@ const HospitalDashboard: React.FC<HospitalDashboardProps> = ({ onLogout }) => {
     totalClaims: 0,
     completedClaims: 0,
     inProcessClaims: 0,
+    claimStageBreakdown: {},
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -95,6 +101,14 @@ const HospitalDashboard: React.FC<HospitalDashboardProps> = ({ onLogout }) => {
           totalClaims: 156,
           completedClaims: 98,
           inProcessClaims: 58,
+          claimStageBreakdown: {
+            [ClaimStage.ADMITTED]: 25,
+            [ClaimStage.DISCHARGED]: 20,
+            [ClaimStage.FILE_SUBMITTED]: 45,
+            [ClaimStage.SETTLED]: 98,
+            [ClaimStage.PENDING]: 8,
+            [ClaimStage.REJECTED]: 2,
+          },
         });
       } catch (error) {
         Alert.alert('Error', 'Failed to load dashboard data');
@@ -128,6 +142,24 @@ const HospitalDashboard: React.FC<HospitalDashboardProps> = ({ onLogout }) => {
     );
   };
 
+  const handleDateFilterChange = (dateFrom: string, dateTo: string) => {
+    // In real app, this would trigger API call with date filters
+    console.log('Date filter changed:', { dateFrom, dateTo });
+  };
+
+  const handleExport = (data: any) => {
+    // In real app, this would handle CSV export
+    console.log('Export data:', data);
+  };
+
+  const summaryMetrics: SummaryMetrics = {
+    totalClaims: metrics.totalClaims,
+    completedClaims: metrics.completedClaims,
+    inProcessClaims: metrics.inProcessClaims,
+    totalHospitals: 1, // Hospital sees only their own data
+    claimStageBreakdown: metrics.claimStageBreakdown,
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -159,32 +191,14 @@ const HospitalDashboard: React.FC<HospitalDashboardProps> = ({ onLogout }) => {
           </Text>
         </View>
 
-        {/* Metrics Section */}
-        <SectionHeader title="Claim Overview" />
-        <View style={styles.metricsGrid}>
-          <MetricCard
-            title="Total Claims"
-            value={metrics.totalClaims}
-            color="#4CAF50"
-            icon="📄"
-            onPress={() => handleNavigation('Total Claims')}
-          />
-          <MetricCard
-            title="Completed Claims"
-            value={metrics.completedClaims}
-            color="#2196F3"
-            icon="✅"
-            onPress={() => handleNavigation('Completed Claims')}
-          />
-          <MetricCard
-            title="In Process Claims"
-            value={metrics.inProcessClaims}
-            color="#FF9800"
-            icon="⏳"
-            onPress={() => handleNavigation('In Process Claims')}
-          />
-        </View>
-
+        {/* Summary View */}
+        <SummaryView
+          metrics={summaryMetrics}
+          role="hospital"
+          onDateFilterChange={handleDateFilterChange}
+          onExport={handleExport}
+          isLoading={isLoading}
+        />
         <Divider />
 
         {/* Quick Actions Section */}

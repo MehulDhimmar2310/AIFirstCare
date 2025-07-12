@@ -7,13 +7,15 @@ import {
   TextInput,
   FlatList,
   ActivityIndicator,
+  ScrollView,
+  Modal,
 } from 'react-native';
 import { Hospital } from '../../types/claim.types';
 
 interface HospitalPickerProps {
   hospitals: Hospital[];
   selectedHospital: Hospital | null;
-  onSelectHospital: (hospital: Hospital) => void;
+  onSelectHospital: (hospital: Hospital | null) => void;
   isLoading: boolean;
 }
 
@@ -27,11 +29,10 @@ const HospitalPicker: React.FC<HospitalPickerProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredHospitals = hospitals.filter(hospital =>
-    hospital.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    hospital.code?.toLowerCase().includes(searchQuery.toLowerCase())
+    hospital.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleHospitalSelect = (hospital: Hospital) => {
+  const handleHospitalSelect = (hospital: Hospital | null) => {
     onSelectHospital(hospital);
     setIsDropdownOpen(false);
     setSearchQuery('');
@@ -44,23 +45,21 @@ const HospitalPicker: React.FC<HospitalPickerProps> = ({
     }
   };
 
-  const renderHospitalItem = ({ item }: { item: Hospital }) => (
+
+
+  const renderClearOption = () => (
     <TouchableOpacity
-      style={styles.hospitalItem}
-      onPress={() => handleHospitalSelect(item)}
+      style={[styles.hospitalItem, styles.clearOption]}
+      onPress={() => handleHospitalSelect(null)}
     >
       <View style={styles.hospitalInfo}>
-        <Text style={styles.hospitalName}>{item.name}</Text>
-        {item.code && (
-          <Text style={styles.hospitalCode}>{item.code}</Text>
-        )}
+        <Text style={styles.clearOptionText}>All Hospitals</Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Hospital Name *</Text>
       
       <TouchableOpacity
         style={[
@@ -77,11 +76,6 @@ const HospitalPicker: React.FC<HospitalPickerProps> = ({
             <Text style={styles.selectedHospitalName}>
               {selectedHospital.name}
             </Text>
-            {selectedHospital.code && (
-              <Text style={styles.selectedHospitalCode}>
-                {selectedHospital.code}
-              </Text>
-            )}
           </View>
         ) : (
           <Text style={styles.placeholder}>Select a hospital</Text>
@@ -92,37 +86,57 @@ const HospitalPicker: React.FC<HospitalPickerProps> = ({
         </Text>
       </TouchableOpacity>
 
-      {isDropdownOpen && (
-        <View style={styles.dropdownContainer}>
-          <View style={styles.searchContainer}>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search hospitals..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              autoFocus
-            />
-          </View>
-          
-          <FlatList
-            data={filteredHospitals}
-            renderItem={renderHospitalItem}
-            keyExtractor={(item) => item.id}
-            style={styles.hospitalList}
-            showsVerticalScrollIndicator={false}
-            maxToRenderPerBatch={10}
-            windowSize={10}
-          />
-          
-          {filteredHospitals.length === 0 && (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>
-                {searchQuery ? 'No hospitals found' : 'No hospitals available'}
-              </Text>
+      <Modal
+        visible={isDropdownOpen}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsDropdownOpen(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setIsDropdownOpen(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.searchContainer}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search hospitals..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                autoFocus
+              />
             </View>
-          )}
-        </View>
-      )}
+            
+            <ScrollView 
+              style={styles.modalScrollView}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+            >
+              {renderClearOption()}
+              {filteredHospitals.map((hospital) => (
+                <TouchableOpacity
+                  key={hospital.id}
+                  style={styles.hospitalItem}
+                  onPress={() => handleHospitalSelect(hospital)}
+                >
+                  <View style={styles.hospitalInfo}>
+                    <Text style={styles.hospitalName}>{hospital.name}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+              
+              {filteredHospitals.length === 0 && (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateText}>
+                    {searchQuery ? 'No hospitals found' : 'No hospitals available'}
+                  </Text>
+                </View>
+              )}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -195,6 +209,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
+    zIndex: 1000,
   },
   searchContainer: {
     padding: 12,
@@ -209,8 +224,39 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E0E0E0',
   },
+  dropdownScrollView: {
+    maxHeight: 200,
+  },
+  dropdownContent: {
+    maxHeight: 200,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    margin: 20,
+    maxHeight: '80%',
+    width: '90%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  modalScrollView: {
+    maxHeight: 300,
+  },
   hospitalList: {
     maxHeight: 200,
+    flexGrow: 0,
   },
   hospitalItem: {
     padding: 16,
@@ -237,6 +283,14 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 14,
     color: '#999999',
+  },
+  clearOption: {
+    backgroundColor: '#F8F9FA',
+  },
+  clearOptionText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: '500',
   },
 });
 

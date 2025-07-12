@@ -1,4 +1,7 @@
 export { default as ClaimStatusSearch } from './ClaimStatusSearch';
+export { default as ClaimSearchInterface } from './ClaimSearchInterface';
+export { default as ClaimSearchTest } from './ClaimSearchTest';
+export { default as ClaimSearchDemoApp } from './ClaimSearchDemoApp';
 export { default as ClaimSubmissionScreen } from './ClaimSubmissionScreen';
 export { default as ClaimSubmissionForm } from './ClaimSubmissionForm';
 export { default as ClaimStatusCard } from './ClaimStatusCard';

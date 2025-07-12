@@ -9,6 +9,7 @@ import {
   Modal,
 } from 'react-native';
 import { ClaimFilterOptions, Hospital, ClaimStage } from '../../types/claim.types';
+import HospitalPicker from './HospitalPicker';
 
 interface ClaimFilterProps {
   filterOptions: ClaimFilterOptions;
@@ -46,6 +47,12 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
     }));
   };
 
+  const handleHospitalSelect = (hospital: Hospital | null) => {
+    handleInputChange('hospitalId', hospital?.id || '');
+  };
+
+  const selectedHospital = hospitals.find(h => h.id === localFilters.hospitalId) || null;
+
   const claimStages = Object.values(ClaimStage);
 
   return (
@@ -78,39 +85,12 @@ const ClaimFilter: React.FC<ClaimFilterProps> = ({
           {/* Hospital Filter */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Hospital</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  !localFilters.hospitalId && styles.chipActive
-                ]}
-                onPress={() => handleInputChange('hospitalId', '')}
-              >
-                <Text style={[
-                  styles.chipText,
-                  !localFilters.hospitalId && styles.chipTextActive
-                ]}>
-                  All Hospitals
-                </Text>
-              </TouchableOpacity>
-              {hospitals.map((hospital) => (
-                <TouchableOpacity
-                  key={hospital.id}
-                  style={[
-                    styles.chip,
-                    localFilters.hospitalId === hospital.id && styles.chipActive
-                  ]}
-                  onPress={() => handleInputChange('hospitalId', hospital.id)}
-                >
-                  <Text style={[
-                    styles.chipText,
-                    localFilters.hospitalId === hospital.id && styles.chipTextActive
-                  ]}>
-                    {hospital.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <HospitalPicker
+              hospitals={hospitals}
+              selectedHospital={selectedHospital}
+              onSelectHospital={handleHospitalSelect}
+              isLoading={false}
+            />
           </View>
 
           {/* Status Filter */}
